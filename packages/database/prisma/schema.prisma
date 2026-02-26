@@ -1,0 +1,347 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String    @id @default(cuid())
+  email           String?   @unique
+  passwordHash    String?
+  minecraftUuid   String    @unique
+  minecraftName   String
+  rank            Rank      @default(DEFAULT)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  lastLogin       DateTime?
+  emailVerified   Boolean   @default(false)
+  twoFactorSecret String?
+  characters      Character[]
+  guildMembership GuildMember?
+  forumPosts      ForumPost[]
+  forumThreads    ForumThread[]
+  reactions       Reaction[]
+  purchases       Purchase[]
+  sessions        Session[]
+  newsArticles    NewsArticle[] @relation("author")
+}
+
+enum Rank {
+  DEFAULT
+  VIP
+  VIP_PLUS
+  HERO
+  HERO_PLUS
+  CHAMPION
+  MODERATOR
+  ADMIN
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Character {
+  id            String     @id @default(cuid())
+  userId        String
+  characterUuid String     @unique
+  className     ClassName
+  level         Int        @default(1)
+  totalXp       BigInt     @default(0)
+  warsCount     Int        @default(0)
+  playtime      Int        @default(0)
+  mobsKilled    Int        @default(0)
+  chestsFound   Int        @default(0)
+  dungeons      Json
+  raids         Json
+  quests        String[]
+  skillPoints   Json
+  professions   Json
+  gamemode      Gamemode[]
+  user          User       @relation(fields: [userId], references: [id])
+}
+
+enum ClassName {
+  WARRIOR
+  MAGE
+  ARCHER
+  ASSASSIN
+  SHAMAN
+}
+
+enum Gamemode {
+  IRONMAN
+  HARDCORE
+  ULTIMATE_IRONMAN
+  CRAFTSMAN
+  HUNTED
+}
+
+model Guild {
+  id           String          @id @default(cuid())
+  name         String          @unique
+  tag          String          @unique
+  level        Int             @default(1)
+  xp           BigInt          @default(0)
+  xpPercent    Float           @default(0)
+  territories  Int             @default(0)
+  wars         Int             @default(0)
+  createdAt    DateTime        @default(now())
+  banner       Json?
+  members      GuildMember[]
+  territoryList Territory[]
+  seasonRanks  GuildSeasonRank[]
+}
+
+model GuildMember {
+  id        String    @id @default(cuid())
+  userId    String    @unique
+  guildId   String
+  role      GuildRole
+  joinedAt  DateTime  @default(now())
+  xpContrib BigInt    @default(0)
+  user      User      @relation(fields: [userId], references: [id])
+  guild     Guild     @relation(fields: [guildId], references: [id])
+}
+
+enum GuildRole {
+  OWNER
+  CHIEF
+  STRATEGIST
+  CAPTAIN
+  RECRUITER
+  RECRUIT
+}
+
+model GuildSeasonRank {
+  id       String @id @default(cuid())
+  guildId  String
+  season   Int
+  rank     Int
+  rating   Int    @default(0)
+  guild    Guild  @relation(fields: [guildId], references: [id])
+  @@unique([guildId, season])
+}
+
+model Territory {
+  id        String  @id @default(cuid())
+  name      String  @unique
+  guildId   String?
+  startX    Int
+  startZ    Int
+  endX      Int
+  endZ      Int
+  resources Json
+  guild     Guild?  @relation(fields: [guildId], references: [id])
+}
+
+model Item {
+  id              String   @id @default(cuid())
+  name            String   @unique
+  displayName     String
+  tier            ItemTier
+  type            ItemType
+  subType         String?
+  level           Int
+  attackSpeed     String?
+  baseDamage      Json?
+  baseDefense     Json?
+  requirements    Json
+  identifications Json
+  powderSlots     Int      @default(0)
+  lore            String?
+  setName         String?
+  restrictions    String?
+  material        String?
+  dropType        String?
+
+  @@index([tier, type, level])
+}
+
+enum ItemTier {
+  NORMAL
+  UNIQUE
+  RARE
+  LEGENDARY
+  FABLED
+  MYTHIC
+  SET
+  CRAFTED
+}
+
+enum ItemType {
+  WEAPON
+  HELMET
+  CHESTPLATE
+  LEGGINGS
+  BOOTS
+  RING
+  BRACELET
+  NECKLACE
+}
+
+model NewsArticle {
+  id          String       @id @default(cuid())
+  slug        String       @unique
+  title       String
+  excerpt     String
+  content     String
+  featuredImg String?
+  category    NewsCategory
+  authorId    String
+  publishedAt DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  author      User         @relation("author", fields: [authorId], references: [id])
+  comments    ForumThread?
+}
+
+enum NewsCategory {
+  UPDATE
+  CHANGELOG
+  EVENT
+  COMMUNITY
+  ANNOUNCEMENT
+}
+
+model ForumCategory {
+  id          String          @id @default(cuid())
+  name        String
+  slug        String          @unique
+  description String
+  sortOrder   Int             @default(0)
+  parentId    String?
+  staffOnly   Boolean         @default(false)
+  parent      ForumCategory?  @relation("subcategories", fields: [parentId], references: [id])
+  children    ForumCategory[] @relation("subcategories")
+  threads     ForumThread[]
+}
+
+model ForumThread {
+  id            String        @id @default(cuid())
+  title         String
+  categoryId    String
+  authorId      String
+  isPinned      Boolean       @default(false)
+  isLocked      Boolean       @default(false)
+  viewCount     Int           @default(0)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  tags          String[]
+  newsArticleId String?       @unique
+  category      ForumCategory @relation(fields: [categoryId], references: [id])
+  author        User          @relation(fields: [authorId], references: [id])
+  posts         ForumPost[]
+  newsArticle   NewsArticle?  @relation(fields: [newsArticleId], references: [id])
+}
+
+model ForumPost {
+  id        String      @id @default(cuid())
+  threadId  String
+  authorId  String
+  content   String
+  isFirst   Boolean     @default(false)
+  createdAt DateTime    @default(now())
+  editedAt  DateTime?
+  thread    ForumThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  author    User        @relation(fields: [authorId], references: [id])
+  reactions Reaction[]
+}
+
+model Reaction {
+  id     String       @id @default(cuid())
+  postId String
+  userId String
+  type   ReactionType
+  post   ForumPost    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user   User         @relation(fields: [userId], references: [id])
+
+  @@unique([postId, userId, type])
+}
+
+enum ReactionType {
+  LIKE
+  AGREE
+  FUNNY
+  USEFUL
+  CREATIVE
+}
+
+model StoreProduct {
+  id          String        @id @default(cuid())
+  name        String
+  slug        String        @unique
+  description String
+  price       Decimal       @db.Decimal(10, 2)
+  category    StoreCategory
+  imageUrl    String?
+  metadata    Json?
+  isActive    Boolean       @default(true)
+  sortOrder   Int           @default(0)
+  purchases   PurchaseItem[]
+}
+
+enum StoreCategory {
+  RANK
+  CRATE
+  PET
+  BOMB
+  COSMETIC
+  GIFT_CARD
+}
+
+model Purchase {
+  id              String         @id @default(cuid())
+  userId          String
+  recipientName   String?
+  totalAmount     Decimal        @db.Decimal(10, 2)
+  currency        String         @default("USD")
+  status          PurchaseStatus @default(PENDING)
+  stripePaymentId String?
+  createdAt       DateTime       @default(now())
+  user            User           @relation(fields: [userId], references: [id])
+  items           PurchaseItem[]
+}
+
+enum PurchaseStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+model PurchaseItem {
+  id         String       @id @default(cuid())
+  purchaseId String
+  productId  String
+  quantity   Int          @default(1)
+  unitPrice  Decimal      @db.Decimal(10, 2)
+  purchase   Purchase     @relation(fields: [purchaseId], references: [id])
+  product    StoreProduct @relation(fields: [productId], references: [id])
+}
+
+model MapLocation {
+  id      String  @id @default(cuid())
+  name    String
+  type    String
+  x       Int
+  y       Int?
+  z       Int
+  icon    String?
+  details Json?
+}
+
+model LeaderboardCache {
+  id        String   @id @default(cuid())
+  type      String   @unique
+  data      Json
+  updatedAt DateTime @default(now())
+
+  @@index([type])
+}
