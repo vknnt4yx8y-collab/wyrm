@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import type { Metadata } from "next";
 import { PageWrapper } from "@/components/layout/PageWrapper";
 import { Eye, EyeOff, Save, User, Lock, Bell } from "lucide-react";
 

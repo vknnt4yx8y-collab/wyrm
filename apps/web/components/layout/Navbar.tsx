@@ -32,7 +32,9 @@ export function Navbar() {
     fetch("/api/auth/me")
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => data?.user && setUser(data.user))
-      .catch(() => {});
+      .catch(() => {
+        // Not authenticated - leave user as null
+      });
   }, []);
 
   useEffect(() => {

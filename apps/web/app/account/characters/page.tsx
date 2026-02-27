@@ -2,7 +2,7 @@ import React from "react";
 import type { Metadata } from "next";
 import { PageWrapper } from "@/components/layout/PageWrapper";
 import Link from "next/link";
-import { Sword, Shield, Zap, Plus } from "lucide-react";
+import { Sword, Plus } from "lucide-react";
 
 export const metadata: Metadata = { title: "Characters - Account" };
 
@@ -49,12 +49,6 @@ const mockCharacters = [
     rankColor: null,
     lastPlayed: "3 weeks ago",
   },
-];
-
-const classStats = [
-  { icon: <Shield className="w-4 h-4" />, label: "Level" },
-  { icon: <Zap className="w-4 h-4" />, label: "Playtime" },
-  { icon: <Sword className="w-4 h-4" />, label: "Deaths" },
 ];
 
 export default function CharactersPage() {
