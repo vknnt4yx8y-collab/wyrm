@@ -5,27 +5,29 @@ import { ThreadList } from "@/components/forums/ThreadList";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 
 interface Props {
-  params: { categorySlug: string };
+  params: Promise<{ categorySlug: string }>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { categorySlug } = await params;
   return {
-    title: `${params.categorySlug} - Forums`,
+    title: `${categorySlug} - Forums`,
   };
 }
 
-export default function ForumCategoryPage({ params }: Props) {
+export default async function ForumCategoryPage({ params }: Props) {
+  const { categorySlug } = await params;
   return (
     <PageWrapper>
       <div className="max-w-5xl mx-auto px-4 py-12">
         <Breadcrumbs
           crumbs={[
             { label: "Forums", href: "/forums" },
-            { label: params.categorySlug },
+            { label: categorySlug },
           ]}
         />
         <div className="mt-6">
-          <ThreadList categorySlug={params.categorySlug} />
+          <ThreadList categorySlug={categorySlug} />
         </div>
       </div>
     </PageWrapper>

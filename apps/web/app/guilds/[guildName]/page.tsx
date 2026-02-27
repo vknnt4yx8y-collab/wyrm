@@ -4,21 +4,23 @@ import { PageWrapper } from "@/components/layout/PageWrapper";
 import { GuildProfile } from "@/components/guilds/GuildProfile";
 
 interface Props {
-  params: { guildName: string };
+  params: Promise<{ guildName: string }>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { guildName } = await params;
   return {
-    title: `${decodeURIComponent(params.guildName)} - Guild`,
-    description: `View guild profile and stats for ${decodeURIComponent(params.guildName)}.`,
+    title: `${decodeURIComponent(guildName)} - Guild`,
+    description: `View guild profile and stats for ${decodeURIComponent(guildName)}.`,
   };
 }
 
-export default function GuildDetailPage({ params }: Props) {
+export default async function GuildDetailPage({ params }: Props) {
+  const { guildName } = await params;
   return (
     <PageWrapper>
       <div className="max-w-6xl mx-auto px-4 py-12">
-        <GuildProfile guildName={decodeURIComponent(params.guildName)} />
+        <GuildProfile guildName={decodeURIComponent(guildName)} />
       </div>
     </PageWrapper>
   );
