@@ -104,4 +104,30 @@ router.post("/register", async (req, res) => {
   }
 });
 
+// GET /auth/me
+router.get("/me", async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader?.startsWith("Bearer ")) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    const token = authHeader.slice(7);
+    const payload = jwt.verify(token, EFFECTIVE_JWT_SECRET) as { userId: string };
+    const user = await prisma.user.findUnique({ where: { id: payload.userId } });
+    if (!user) {
+      return res.status(401).json({ error: "User not found" });
+    }
+    return res.json({
+      user: {
+        id: user.id,
+        email: user.email,
+        minecraftName: user.minecraftName,
+        rank: user.rank,
+      },
+    });
+  } catch {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+});
+
 export default router;
