@@ -3,8 +3,8 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-const ADMIN_USERNAME = "admin";
-const ADMIN_PASSWORD = "admin123";
+const ADMIN_USERNAME = "tzkal";
+const ADMIN_PASSWORD = "535352";
 
 export default function AdminLoginPage() {
   const [username, setUsername] = useState("");
@@ -56,7 +56,7 @@ export default function AdminLoginPage() {
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                placeholder="admin"
+                placeholder="tzkal"
                 required
                 className="w-full bg-bg-elevated border border-bg-card rounded-lg px-3 py-2.5 text-text-primary placeholder:text-text-muted focus:outline-none focus:border-accent-gold text-sm"
               />
@@ -81,7 +81,7 @@ export default function AdminLoginPage() {
             </button>
           </form>
           <p className="text-text-muted text-xs text-center mt-4">
-            Default credentials: <span className="font-mono text-accent-gold">admin / admin123</span>
+            Default credentials: <span className="font-mono text-accent-gold">tzkal / 535352</span>
           </p>
         </div>
       </div>

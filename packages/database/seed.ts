@@ -21,6 +21,21 @@ async function main() {
     },
   });
 
+  // Create tzkal admin user
+  const tzkalPasswordHash = await bcrypt.hash("535352", 12);
+  await prisma.user.upsert({
+    where: { minecraftUuid: "tzkal-uuid-00000000" },
+    update: { passwordHash: tzkalPasswordHash },
+    create: {
+      email: "tzkal@wynncraft.com",
+      passwordHash: tzkalPasswordHash,
+      minecraftUuid: "tzkal-uuid-00000000",
+      minecraftName: "tzkal",
+      rank: Rank.ADMIN,
+      emailVerified: true,
+    },
+  });
+
   // Create sample players
   const playerNames = ["Jumla", "Grian", "ThunderMCPE", "ElDiaEntre", "Cookiestix", "Illindra", "Sorcerer753", "NicBOMB", "Moe_Shapes", "HighboundHazel"];
   const players = [];

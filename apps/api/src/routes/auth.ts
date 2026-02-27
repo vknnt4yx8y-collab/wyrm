@@ -26,12 +26,12 @@ const EFFECTIVE_JWT_SECRET = JWT_SECRET || "wynncraft-secret-change-in-developme
 
 const loginSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(8),
+  password: z.string().min(6),
 });
 
 const registerSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(8),
+  password: z.string().min(6),
   minecraftName: z.string().min(3).max(16),
 });
 
