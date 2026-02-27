@@ -3,9 +3,20 @@ import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { z } from "zod";
+import { rateLimit } from "express-rate-limit";
 
 const router = Router();
 const prisma = new PrismaClient();
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many requests, please try again later." },
+});
+
+router.use(authLimiter);
 
 const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET && process.env.NODE_ENV === "production") {
@@ -101,6 +112,32 @@ router.post("/register", async (req, res) => {
       return res.status(400).json({ error: "Invalid input", details: error.errors });
     }
     return res.status(500).json({ error: "Registration failed" });
+  }
+});
+
+// GET /auth/me
+router.get("/me", async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader?.startsWith("Bearer ")) {
+      return res.status(401).json({ error: "Unauthorized" });
+    }
+    const token = authHeader.slice(7);
+    const payload = jwt.verify(token, EFFECTIVE_JWT_SECRET) as { userId: string };
+    const user = await prisma.user.findUnique({ where: { id: payload.userId } });
+    if (!user) {
+      return res.status(401).json({ error: "User not found" });
+    }
+    return res.json({
+      user: {
+        id: user.id,
+        email: user.email,
+        minecraftName: user.minecraftName,
+        rank: user.rank,
+      },
+    });
+  } catch {
+    return res.status(401).json({ error: "Unauthorized" });
   }
 });
 
