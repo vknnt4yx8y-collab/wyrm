@@ -4,7 +4,7 @@ import { PageWrapper } from "@/components/layout/PageWrapper";
 import { ThreadView } from "@/components/forums/ThreadView";
 
 interface Props {
-  params: { categorySlug: string; threadId: string };
+  params: Promise<{ categorySlug: string; threadId: string }>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -13,11 +13,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default function ForumThreadPage({ params }: Props) {
+export default async function ForumThreadPage({ params }: Props) {
+  const { categorySlug, threadId } = await params;
   return (
     <PageWrapper>
       <div className="max-w-4xl mx-auto px-4 py-12">
-        <ThreadView threadId={params.threadId} categorySlug={params.categorySlug} />
+        <ThreadView threadId={threadId} categorySlug={categorySlug} />
       </div>
     </PageWrapper>
   );

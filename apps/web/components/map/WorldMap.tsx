@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
+import "leaflet/dist/leaflet.css";
+import type { Map as LeafletMap } from "leaflet";
 
 export function WorldMap() {
   const mapRef = useRef<HTMLDivElement>(null);
@@ -8,11 +10,10 @@ export function WorldMap() {
   useEffect(() => {
     if (!mapRef.current) return;
     // Leaflet is loaded dynamically to avoid SSR issues
-    let map: { remove: () => void } | null = null;
+    let map: LeafletMap | null = null;
 
     const initMap = async () => {
       const L = (await import("leaflet")).default;
-      await import("leaflet/dist/leaflet.css");
 
       if (!mapRef.current) return;
 
@@ -47,7 +48,7 @@ export function WorldMap() {
           fillColor: "#f5c542",
           fillOpacity: 0.8,
           weight: 2,
-        }).addTo(map as L.Map);
+        }).addTo(map as LeafletMap);
         marker.bindTooltip(city.name, { permanent: false });
       });
     };

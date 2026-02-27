@@ -6,11 +6,12 @@ import { CLASS_DATA } from "@/lib/constants";
 import { notFound } from "next/navigation";
 
 interface Props {
-  params: { className: string };
+  params: Promise<{ className: string }>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const key = params.className.toUpperCase();
+  const { className } = await params;
+  const key = className.toUpperCase();
   const cls = CLASS_DATA[key as keyof typeof CLASS_DATA];
   if (!cls) return { title: "Class Not Found" };
   return {
@@ -19,8 +20,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default function ClassDetailPage({ params }: Props) {
-  const key = params.className.toUpperCase();
+export default async function ClassDetailPage({ params }: Props) {
+  const { className } = await params;
+  const key = className.toUpperCase();
   const cls = CLASS_DATA[key as keyof typeof CLASS_DATA];
   if (!cls) notFound();
 

@@ -4,21 +4,23 @@ import { PageWrapper } from "@/components/layout/PageWrapper";
 import { PlayerCard } from "@/components/stats/PlayerCard";
 
 interface Props {
-  params: { username: string };
+  params: Promise<{ username: string }>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { username } = await params;
   return {
-    title: `${params.username} - Stats`,
-    description: `View ${params.username}'s Wynncraft stats, characters, and achievements.`,
+    title: `${username} - Stats`,
+    description: `View ${username}'s Wynncraft stats, characters, and achievements.`,
   };
 }
 
-export default function PlayerPage({ params }: Props) {
+export default async function PlayerPage({ params }: Props) {
+  const { username } = await params;
   return (
     <PageWrapper>
       <div className="max-w-6xl mx-auto px-4 py-12">
-        <PlayerCard username={params.username} />
+        <PlayerCard username={username} />
       </div>
     </PageWrapper>
   );
